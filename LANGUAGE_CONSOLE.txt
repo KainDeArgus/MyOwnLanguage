@@ -1,0 +1,3 @@
+The lexical analysis was successful
+The parsing was successful
+The interpreting was successful

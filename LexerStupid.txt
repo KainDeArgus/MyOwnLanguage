@@ -1,0 +1,272 @@
+import Tokens.TOKENS;
+
+import java.io.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import static java.util.Map.entry;
+
+public class LexerStupid {
+    private static final File outputFile = new File("output.txt");
+    private FileReader fileReader;
+    private char currChar;
+    private static final Map<String, TOKENS> operator = Map.ofEntries(
+            entry("=", TOKENS.T_ASSGN),
+            entry("+", TOKENS.T_ADD),
+            entry("-", TOKENS.T_SUB),
+            entry("*", TOKENS.T_MUL),
+            entry("/", TOKENS.T_DIV),
+            entry("%", TOKENS.T_REM),
+            entry("!", TOKENS.T_NOT),
+            entry(">", TOKENS.T_GREAT),
+            entry("<", TOKENS.T_LESS),
+            entry("&", TOKENS.T_AND),
+            entry("|", TOKENS.T_OR),
+            entry("(", TOKENS.T_LPAREN),
+            entry(")", TOKENS.T_RPAREN),
+            entry("{", TOKENS.T_LBRACE),
+            entry("}", TOKENS.T_RBRACE),
+            entry("[", TOKENS.T_LBRACKET),
+            entry("]", TOKENS.T_RBRACKET),
+            entry(";", TOKENS.T_SEMICOLON),
+            entry(",", TOKENS.T_COMMA)
+    );
+    private static final Map<String, TOKENS> keyWord = Map.ofEntries(
+            entry("char", TOKENS.T_CHAR),
+            entry("int", TOKENS.T_INT),
+            entry("float", TOKENS.T_FLOAT),
+            entry("string", TOKENS.T_STRING),
+            entry("void", TOKENS.T_VOID),
+            entry("if", TOKENS.T_IF),
+            entry("else", TOKENS.T_ELSE),
+            entry("while", TOKENS.T_WHILE),
+            entry("for", TOKENS.T_FOR),
+            entry("print", TOKENS.T_PRINTF),
+            entry("scan", TOKENS.T_SCANF),
+            entry("main", TOKENS.T_MAIN)
+    );
+    private static final Set<String> specialSymbols = Set.of("\t", "\b", "\n", "\r", "\f");
+    private static final int MAXIDENT = 64;
+    private static final String nonValueString = "---";
+    private static final String commaString = ", ";
+    LexerStupid() throws IOException {
+        outputFile.delete();
+        outputFile.createNewFile();
+        currChar = ' ';
+    }
+    LexerStupid(File file) throws IOException {
+        outputFile.delete();
+        outputFile.createNewFile();
+        currChar = ' ';
+        fileReader = new FileReader(file.getParent());
+    }
+    public boolean lexAnalyses() throws IOException {
+        if(fileReader == null)
+            return false;
+
+        while (true) {
+            Map.Entry<TOKENS, String> tokenStringEntry = getToken();
+            TOKENS TOKENS = tokenStringEntry.getKey();
+            String string = tokenStringEntry.getValue();
+
+            if(TOKENS == TOKENS.T_EOF)
+                break;
+            if(TOKENS == TOKENS.T_UNDEF) {
+                printResult(TOKENS.name());
+                break;
+            }
+
+            if(Objects.equals(string, nonValueString))
+                printResult(TOKENS.name() + "\n");
+            else
+                printResult(TOKENS.name() + commaString + "\"" + string + "\"\n");
+        }
+
+        return true;
+    }
+    private Map.Entry<TOKENS, String> getToken() throws IOException {
+            //Проверка на комментарий
+            while(currChar == '/'){
+                char commentChar = readChar();
+                if(commentChar == '*'){
+                    do{
+                        commentChar = readChar();
+                    }while(commentChar != '*' && !isEOF(commentChar));
+                    if(isEOF(commentChar))
+                        return entry(TOKENS.T_UNDEF, nonValueString);
+                    currChar = readChar();
+
+                    if(currChar == '/')
+                        currChar = readChar();
+                    else
+                        return entry(TOKENS.T_UNDEF, nonValueString);
+                }
+                else {
+                    currChar = commentChar;
+                    return entry(TOKENS.T_DIV, nonValueString);
+                }
+            }
+
+            while (!isEOF(currChar) && (currChar == ' ' || specialSymbols.contains(String.valueOf(currChar))))
+                currChar = readChar();
+
+            if(isEOF(currChar))
+                return entry(TOKENS.T_EOF, nonValueString);
+
+            Map.Entry<TOKENS, String> tokenStringEntry = null;
+
+            for(int i = 0; tokenStringEntry == null; i++){
+                switch (i){
+                    case 0 -> tokenStringEntry = isIDENT();
+                    case 1 -> tokenStringEntry = isINTCON();
+                    case 2 -> tokenStringEntry = isSTRINGCON();
+                    case 3 -> tokenStringEntry = isCHARCON();
+                    case 4 -> tokenStringEntry = isOPERATOR();
+                    default -> tokenStringEntry = entry(TOKENS.T_UNDEF, nonValueString);
+                }
+            }
+
+            return tokenStringEntry;
+    }
+    private Map.Entry<TOKENS, String> isIDENT() throws IOException {
+        if(isLetter(currChar) || currChar == '_'){
+            StringBuilder ident = new StringBuilder();
+
+            for(int i = 0; i < MAXIDENT && (isLetter(currChar) || isDigit(currChar) || currChar == '_'); i++) {
+                ident.append(currChar);
+                currChar = readChar();
+            }
+
+            String IDENT = ident.toString();
+
+            TOKENS TOKENS = keyWord.get(IDENT);
+            if(TOKENS == null)
+                return entry(TOKENS.T_IDENT, IDENT);
+            else
+                return entry(TOKENS, nonValueString);
+        }
+        return null;
+    }
+    public Map.Entry<TOKENS, String> isINTCON() throws IOException{
+        if(isDigit(currChar)){
+            StringBuilder number = new StringBuilder();
+            do{
+                number.append(currChar);
+                currChar = readChar();
+            }while (isDigit(currChar));
+            if(currChar == '.') {
+                number.append(currChar);
+                Map.Entry<TOKENS, String> floatCon = isFLOATCON();
+                return floatCon == null ? entry(TOKENS.T_UNDEF, nonValueString) : entry(floatCon.getKey(), number.toString() + floatCon.getValue());
+            }
+            return entry(TOKENS.T_INTCON, number.toString());
+        }
+
+        if(currChar == '.'){
+            Map.Entry<TOKENS, String> floatCon = isFLOATCON();
+            return floatCon == null ? entry(TOKENS.T_UNDEF, nonValueString) : entry(floatCon.getKey(), String.valueOf('.') + floatCon.getValue());
+        }
+
+        return null;
+    }
+    private Map.Entry<TOKENS, String> isFLOATCON() throws IOException{
+        currChar = readChar();
+        if(isDigit(currChar)){
+            StringBuilder number = new StringBuilder();
+            do{
+                number.append(currChar);
+                currChar = readChar();
+            }while (isDigit(currChar));
+            if(currChar == 'e' || currChar == 'E'){
+                number.append(currChar);
+                currChar = readChar();
+                if(currChar == '-' || currChar == '+'){
+                    number.append(currChar);
+                    currChar = readChar();
+                }
+                if(isDigit(currChar)){
+                    do{
+                        number.append(currChar);
+                        currChar = readChar();
+                    }while (isDigit(currChar));
+                }
+                else
+                    return null;
+            }
+            return entry(TOKENS.T_FLOATCON, number.toString());
+        }
+        return null;
+    }
+    private Map.Entry<TOKENS, String> isCHARCON() throws IOException{
+        if(currChar == '\''){
+            char charCon = readChar();
+            currChar = readChar();
+            if(currChar == '\'') {
+                currChar = readChar();
+                return entry(TOKENS.T_CHARCON, String.valueOf(charCon));
+            }
+            else
+                return entry(TOKENS.T_UNDEF, nonValueString);
+        }
+        return null;
+    }
+    private Map.Entry<TOKENS, String> isSTRINGCON() throws IOException{
+        if(currChar == '\"'){
+            StringBuilder string = new StringBuilder();
+
+            currChar = readChar();
+            while(currChar != '\"' && !isEOF(currChar)){
+                string.append(currChar);
+                currChar = readChar();
+            }
+
+            currChar = readChar();
+            return isEOF(currChar) ? entry(TOKENS.T_UNDEF, nonValueString) : entry(TOKENS.T_STRINGCON,  string.toString());
+        }
+        return null;
+    }
+    private Map.Entry<TOKENS, String> isOPERATOR() throws  IOException{
+        TOKENS TOKENS = operator.get(String.valueOf(currChar));
+        currChar = readChar();
+        if(currChar == '=') {
+            if(TOKENS == TOKENS.T_ASSGN)
+                TOKENS = TOKENS.T_EQUAL;
+
+            if(TOKENS == TOKENS.T_NOT)
+                TOKENS = TOKENS.T_NEQUAL;
+
+            if(TOKENS == TOKENS.T_GREAT)
+                TOKENS = TOKENS.T_EOGREAT;
+
+            if(TOKENS == TOKENS.T_LESS)
+                TOKENS = TOKENS.T_EOLESS;
+
+            currChar = readChar();
+        }
+        return TOKENS == null ? null : entry(TOKENS, nonValueString);
+    }
+    private boolean isLetter(char currChar){
+        return Character.isLetter(currChar);
+    }
+    private boolean isDigit(char currChar){
+        return Character.isDigit(currChar);
+    }
+    private boolean isEOF(char currChar){
+        return currChar == (char) -1;
+    }
+    private char readChar() throws IOException {
+        return (char) fileReader.read();
+    }
+    private void printResult(String information) throws IOException {
+        FileOutputStream outputStream = new FileOutputStream(outputFile, true);
+        outputStream.write(information.getBytes());
+    }
+    public void setFileReader(File file){
+        try {
+            fileReader = new FileReader(file.getPath());
+        } catch (FileNotFoundException e) {
+            fileReader = null;
+        }
+    }
+}

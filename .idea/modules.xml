@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/GrammarTask/GrammarTask.iml" filepath="$PROJECT_DIR$/GrammarTask/GrammarTask.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Lab.iml" filepath="$PROJECT_DIR$/Lab.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Language/Language.iml" filepath="$PROJECT_DIR$/Language/Language.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RegexTask/RegexTask.iml" filepath="$PROJECT_DIR$/RegexTask/RegexTask.iml" />
+    </modules>
+  </component>
+</project>

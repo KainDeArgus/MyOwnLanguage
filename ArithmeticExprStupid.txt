@@ -1,0 +1,104 @@
+import Tree.ExprTypes.ExpressionInterface;
+import Tokens.TOKENS;
+import Tokens.Token;
+import Tree.Node;
+
+import java.util.*;
+
+public class ArithmeticExprStupid extends Node implements ExpressionInterface<Float> {
+    private Float value;
+    private final Queue<Token> expression;
+    public ArithmeticExprStupid(Queue<Token> expression) {
+        super(line);
+        this.expression = expression;
+    }
+    private static final Map<TOKENS, Integer> priority = Map.of(
+            TOKENS.T_ADD, 0,
+            TOKENS.T_SUB, 0,
+            TOKENS.T_MUL, 1,
+            TOKENS.T_DIV, 1,
+            TOKENS.T_REM, 1,
+            TOKENS.T_LPAREN, -1,
+            TOKENS.T_RPAREN, -1
+    );
+    private Queue<Token> infToPost(){
+        Stack<Token> stack = new Stack<>();
+        Queue<Token> suppList = new LinkedList<>();
+
+        while(!expression.isEmpty()){
+            Token element = expression.poll();
+            TOKENS token = element.getToken();
+            if(token == TOKENS.T_INTCON || token == TOKENS.T_FLOATCON || token == TOKENS.T_IDENT)
+                suppList.add(element);
+            else{
+                if(stack.isEmpty() || stack.peek().getToken() == TOKENS.T_RPAREN || token == TOKENS.T_LPAREN) {
+                    stack.add(element);
+                    continue;
+                }
+                if(token == TOKENS.T_RPAREN){
+                    while (stack.peek().getToken() != TOKENS.T_LPAREN)
+                        suppList.add(stack.pop());
+                    stack.pop();
+                    continue;
+                }
+                while(!stack.empty() && priority.get(token) <= priority.get(stack.peek().getToken()) && stack.peek().getToken() != TOKENS.T_LPAREN)
+                    suppList.add(stack.pop());
+                stack.push(element);
+            }
+        }
+        while(!stack.empty())
+            suppList.add(stack.pop());
+
+        return suppList;
+    }
+
+    @Override
+    public boolean run() {
+        Queue<Token> postExpr = infToPost();
+
+        Stack<Float> stackPost = new Stack<>();
+
+        while(!postExpr.isEmpty()){
+            Token element = postExpr.poll() ;
+            TOKENS token = element.getToken();
+            if(token == TOKENS.T_INTCON || token == TOKENS.T_FLOATCON)
+                stackPost.push(Float.valueOf(element.getValue()));
+            else if(token == TOKENS.T_IDENT){
+                Float number = parent.getIdent(element.getValue(), Float.MAX_VALUE);
+                if(number == null) {
+                    Integer numberI = parent.getIdent(element.getValue(), Integer.MAX_VALUE);
+                    if(numberI == null){
+                        //Несуществующий идентификатор
+                        return false;
+                    }
+                    number = numberI.floatValue();
+                }
+                stackPost.push(number);
+            }
+            else{
+                Float top = stackPost.pop();
+                Float second = stackPost.pop();
+
+                switch (token) {
+                    case T_ADD -> stackPost.push(second + top);
+                    case T_SUB -> stackPost.push(second - top);
+                    case T_MUL -> stackPost.push(second * top);
+                    case T_DIV -> {
+                        if(top == 0) {
+                            //Ошибка деления на ноль
+                            return false;
+                        }
+                        stackPost.push(second / top);
+                    }
+                }
+            }
+        }
+        value = stackPost.pop();
+        return true;
+    }
+
+    @Override
+    public Float getValue() {
+        return value;
+    }
+}

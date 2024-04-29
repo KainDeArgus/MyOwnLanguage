@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="udojava.EvalEx" type="repository">
+    <properties maven-id="com.udojava:EvalEx:2.7" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/udojava/EvalEx/2.7/EvalEx-2.7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

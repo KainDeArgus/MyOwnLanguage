@@ -1,0 +1,12 @@
+S ::== string | int | list | dict
+
+string ::== digit <:> alpha
+int ::== <i> digit <e>
+list ::== <l> elements <e> | <l> <e>
+dict ::== <d> keyANDvalue <e> | <d> <e>
+elements ::== S elements | S
+keyANDvalue ::== S S keyANDvalue | S S
+
+digit ::== <digit> digit | <digit>
+alpha ::== <alfa> alpha | <alpha>
+
