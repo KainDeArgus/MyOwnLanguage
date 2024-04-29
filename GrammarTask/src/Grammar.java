@@ -2,21 +2,12 @@ import java.io.*;
 
 public class Grammar {
     private static final File outputFile = new File("output.txt");
-    private FileReader fileReader;
-    private static char EOF = (char) -1;
+    private final FileReader fileReader;
     private int positionChar;
     private char currChar;
     private boolean error;
-    private StringBuilder resultString;
+    private final StringBuilder resultString;
 
-    public Grammar() throws IOException {
-        outputFile.delete();
-        outputFile.createNewFile();
-        error = false;
-        fileReader = null;
-        positionChar = 0;
-        resultString = new StringBuilder();
-    }
     public Grammar(File file) throws IOException {
         outputFile.delete();
         outputFile.createNewFile();
@@ -25,9 +16,7 @@ public class Grammar {
         positionChar = 0;
         resultString = new StringBuilder();
     }
-    public void setFileReader(FileReader fileReader) {
-        this.fileReader = fileReader;
-    }
+
     public boolean syntaxAnalys(){
         boolean find = false;
         if(fileReader == null)
@@ -91,22 +80,18 @@ public class Grammar {
         if(currChar == 'l'){
             resultString.append("[ ");
             getChar();
-            if(currChar == 'e'){
-                resultString.append("]");
-                return true;
-            }
-            else{
+            if (currChar != 'e') {
                 itElements();
-                if(error)
+                if (error)
                     return false;
-                if(currChar != 'e'){
+                if (currChar != 'e') {
                     error = true;
                     return false;
                 }
-                getChar();
-                resultString.append("]");
-                return true;
             }
+            getChar();
+            resultString.append("]");
+            return true;
         }
         return false;
     }
@@ -116,22 +101,18 @@ public class Grammar {
         if(currChar == 'd'){
             resultString.append("[ ");
             getChar();
-            if(currChar == 'e'){
-                resultString.append("]");
-                return true;
-            }
-            else{
+            if (currChar != 'e') {
                 itKeyAndValue();
-                if(error)
+                if (error)
                     return false;
-                if(currChar != 'e'){
+                if (currChar != 'e') {
                     error = true;
                     return false;
                 }
-                getChar();
-                resultString.append("]");
-                return true;
             }
+            getChar();
+            resultString.append("]");
+            return true;
         }
         return false;
     }
@@ -194,6 +175,7 @@ public class Grammar {
     private StringBuilder getString(int size){
         StringBuilder line = new StringBuilder();
         for(int i = 0; i < size; i++){
+            char EOF = (char) -1;
             if(currChar == EOF) {
                 error = true;
                 break;
@@ -224,7 +206,7 @@ public class Grammar {
         }
     }
     private void printResult() {
-        FileOutputStream outputStream = null;
+        FileOutputStream outputStream;
         try {
             outputStream = new FileOutputStream(outputFile, true);
             if(error)
