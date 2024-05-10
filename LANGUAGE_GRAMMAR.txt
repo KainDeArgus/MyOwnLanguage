@@ -2,34 +2,28 @@ S ::== block <EOF>
 block ::== <LBRACE> { NT | BL }* <RBRACE>
 NT ::== { decl | init | assgn | func } <SEMICOLON>
 BL ::== main || if || while || for || block
-
 func ::== printF || scanF
-
 decl ::== type <IDENT>
-
 init ::== type assgn
-
 assgn ::== <IDENT> <ASSGN> { expr | letter }
-
 printF ::== <PRINTF> <LPAREN> <STRINGCON> arguments* <RPAREN>
 scanF ::== <SCANF> <LPAREN> <STINGCON> arguments+ <RPAREN>
 arguments ::== <COMMA> { letter | number | <IDENT>}
-
 main ::== <VOID> <MAIN> <LPAREN> <RPAREN> block
-
 if ::== <IF> <LPAREN> logicExpr <RPAREN> block else?
 else ::== <ELSE> block
-
 while ::== <WHILE> <LPAREN> logicExpr <RPAREN> block
 for ::== <FOR> <LPAREN> { init | assgn } <SEMICOLON> logicExpr <SEMICOLON> assgn <RPAREN> block
-
 expr ::==  <LPAREN> expr <RPAREN> || <SUB>? { <IDENT> | number } (sign expr)*
-
 logicExpr ::== { expr logicSign expr | <NOT>? <LPAREN> logicExpr <RPAREN> } (logicSign logicExpr)*
 
-[Конечные нетерминалы
+[Конечные нетерминалы]
 logicSign ::== <NOT> || <EQUAL> || <NEQUAL> || <EOGREAT> || <GREAT> || <EOLESS> || <LESS> || <AND> || <OR>
 letter ::== <STRINGCON> || <CHARCON>
 number ::== <INTCON> || <FLOATCON>
 sign ::== <ADD> || <SUB> || <MUL> || <DIV> || <REM>
-type ::== <CHAR> || <INT> || <FLOAT> || <STRING>]
+type ::== <CHAR> || <INT> || <FLOAT> || <STRING>
+
+
+
+

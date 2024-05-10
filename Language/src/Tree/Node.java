@@ -5,7 +5,7 @@ import LPI.Printer;
 public abstract class Node {
     protected BlockNode parent;
     protected int line;
-    protected static final String interpretationError = "Interpretation error at "; //Строка для выведения ошибок интерпретации
+    protected static final String interpretationError = "Interpretation error at "; //Строка для вывода ошибок интерпретации
 
     protected void setLine(int line){
         this.line = line;

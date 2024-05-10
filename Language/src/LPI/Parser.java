@@ -10,7 +10,7 @@ import java.util.*;
 
 public class Parser {
     private boolean ERROR = false;
-    private static final String syntaxError = "Syntax error at "; //Строка для выведения синтаксических ошибок
+    private static final String syntaxError = "Syntax error at "; //Строка для вывода синтаксических ошибок
     private static final Set<TOKENS> logicSign = Set.of(
             TOKENS.T_NOT,
             TOKENS.T_EQUAL,
@@ -409,7 +409,6 @@ public class Parser {
         returnTokenFromBuffer();
         return false;
     }
-
 
     private boolean logicExpr(){
         int startToken = stackSize();

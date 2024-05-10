@@ -1,2 +1,1 @@
-OK
-[ [ 1 ] => 1, [ ] => [ 'spam', [ ] ] ]
+Error at position 20

@@ -16,7 +16,7 @@ public class DSL {
 
             if(parser.syntaxAnalysis()) {
                 Interpreter interpreter = new Interpreter(parser.getStartBlock());
-                //interpreter.printAST();
+                interpreter.printAST();
                 interpreter.interpret();
             }
 

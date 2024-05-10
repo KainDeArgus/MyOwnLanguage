@@ -11,7 +11,7 @@ import java.util.Objects;
 
 
 public class LogicExpr extends Node implements ExpressionInterface<Boolean> {
-    private boolean value;
+        private boolean value;
     private final ArrayList<Token> expression;
 
     public LogicExpr(ArrayList<Token> expression) {

@@ -17,6 +17,8 @@ public class ForNode extends Node{
         this.assgn = assgn;
         this.block = block;
     }
+
+    @Override
     public void setParent(BlockNode parent) {
         this.parent = parent;
         logicExpr.setParent(block);
@@ -24,6 +26,7 @@ public class ForNode extends Node{
         declCounter.setParent(block);
         assgn.setParent(block);
     }
+
     @Override
     public boolean run() {
         boolean interpretSuccess = declCounter.run();

@@ -9,7 +9,6 @@ public class Printer {
     private static final ArrayList<String> program = new ArrayList<>();
     private static final ArrayList<String> logs = new ArrayList<>();
 
-
     public static void print(String ErrorPass, String OutputPass) throws IOException {
         new FileOutputStream(ErrorPass).close();
         new File(ErrorPass).createNewFile();
